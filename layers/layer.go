@@ -190,6 +190,17 @@ func (l Layer) FileExists(file string) (bool, error) {
 	return internal.FileExists(af)
 }
 
+// ResetRoot clears the layer's Root directory, including any environment variable data.
+func (l Layer) ResetRoot() error {
+	if err := os.RemoveAll(l.Root); err != nil {
+		return err
+	}
+	if err := os.Mkdir(l.Root, 0755); err != nil {
+		return err
+	}
+	return nil
+}
+
 type layerMetadata struct {
 	Build    bool        `toml:"build"`
 	Cache    bool        `toml:"cache"`

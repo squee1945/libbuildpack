@@ -231,5 +231,39 @@ launch = true
 			})
 		})
 
+		when("reset layer", func() {
+			var (
+				l layers.Layer
+			)
+
+			it.Before(func() {
+				root := internal.ScratchDir(t, "layer")
+				var err error
+				l, err = layers.Layers{Root: root}.Layer("reset-layer")
+				g.Expect(err).NotTo(HaveOccurred())
+			})
+
+			it("erases files", func() {
+				filename := "file1.txt"
+				err := ioutil.WriteFile(filepath.Join(l.Root, filename), []byte("contents"), 0600)
+				g.Expect(err).NotTo(HaveOccurred())
+
+				l.ResetRoot()
+				entries, err := ioutil.ReadDir(l.Root)
+				g.Expect(err).NotTo(HaveOccurred())
+				g.Expect(entries).Should(HaveLen(0))
+			})
+
+			it("erases environment", func() {
+				err := l.AppendSharedEnv("MY_ENV", "MY_VALUE")
+				g.Expect(err).NotTo(HaveOccurred())
+
+				l.ResetRoot()
+				entries, err := ioutil.ReadDir(l.Root)
+				g.Expect(err).NotTo(HaveOccurred())
+				g.Expect(entries).Should(HaveLen(0))
+			})
+		})
+
 	}, spec.Report(report.Terminal{}))
 }
